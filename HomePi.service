@@ -1,0 +1,8 @@
+[Unit]
+Description=HomePi_LocalSwitch_Service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/guy/Documents/github/Rpi/SmartHome/LocalSwitch/DSswitch.py
+[Install]
+WantedBy=multi-user.target
