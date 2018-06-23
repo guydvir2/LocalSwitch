@@ -1,6 +1,7 @@
 from signal import pause
 from time import sleep
 from sys import platform
+from sys import path
 import datetime
 import time
 import os
@@ -16,7 +17,9 @@ except ImportError:  # ModuleNotFoundError:
     gpiozero_modules = False
 
 try:
-    import my_paths
+    main_path = '/home/guy/github/modules'
+    path.append(main_path)
+    # import my_paths
     from gmail_mod import GmailSender
     import getip
     # import use_lcd

@@ -1,20 +1,17 @@
-from localswitches import HomePiLocalSwitch
 import sys
 import getopt
 from time import sleep
 import os
 from sys import path
 
-################## Path Parameters #################
-#if os_type == 'darwin':
-#        main_path = '/Users/guy/Documents/github/Rpi/'
-#    elif os_type == 'win32':
-#            main_path = 'd:/users/guydvir/Documents/git/Rpi/'
-#        elif os_type == 'linux':
-#                main_path = '/home/guy/Documents/github/Rpi/'
-#
-main_path = '~/github/LocalSwitch'
+################## Path Parameters ##################
+main_path = '/home/guy/github/LocalSwitch'
+sub_path='/FamilyRoomWindow'
 path.append(main_path)
+homedir = main_path + sub_path
+from localswitches import HomePiLocalSwitch
+import getip
+######################################################
 
 ################## Switch Parameters #################
 device_name = 'F-RoomWindow'
@@ -22,10 +19,10 @@ switch_type = 'double'
 gpio_in = [20, 21]
 gpio_out = [19, 26]
 mode = 'press'
-ext_log = '/home/guy/Documents/%s.log' % (device_name)
+ext_log = homedir + '/%s.log' % (device_name)
 recps = ['guydvir.tech@gmail.com']
-s_file = '/home/guy/Documents/github/Rpi/modules/ufile.txt'
-p_file = '/home/guy/Documents/github/Rpi/modules/pfile.txt'
+s_file = main_path + '/ufile.txt'
+p_file = main_path + '/pfile.txt'
 sw0_name = '/Up'
 sw1_name = '/Down'
 #######################################################
@@ -33,7 +30,7 @@ sw1_name = '/Down'
 ########################  Schedule 0  #################
 # Select One
 local_schedule_0 = None
-sched_filename_0 = main_path+'/FamilyRoomWindow/test_sched_up.txt'
+sched_filename_0 = homedir + '/test_sched_up.txt'
 #######################################################
 
 
@@ -41,7 +38,7 @@ sched_filename_0 = main_path+'/FamilyRoomWindow/test_sched_up.txt'
 # Select One
 # DoubleSwitch only
 local_schedule_1 = None
-sched_filename_1 = '/home/guy/LocalSwitch/sched_down.txt'
+sched_filename_1 = homedir + '/test_sched_down.txt'
 #######################################################
 
 
@@ -102,7 +99,7 @@ else:
     loc_double_switch.gmail_defs(recipients=recps, sender_file=s_file, password_file=p_file)
 
     # Notify after boot
-    loc_double_switch.notify_by_mail(subj='HomePi:%s boot summery' % device_name, body='Device loaded successfully')
+    loc_double_switch.notify_by_mail(subj='HomePi:%s boot summery' % device_name, body='Device loaded successfully @%s'%getip.get_ip()[0])
 
     # Boot test
     if switch_type == 'double':

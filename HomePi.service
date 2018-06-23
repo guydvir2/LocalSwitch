@@ -3,6 +3,6 @@ Description=HomePi_LocalSwitch_Service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/guy/Documents/github/Rpi/SmartHome/LocalSwitch/DSswitch.py
+ExecStart=/usr/bin/python3 /home/guy/github/LocalSwitch/FamilyRoomWindow/DSswitch.py
 [Install]
 WantedBy=multi-user.target
