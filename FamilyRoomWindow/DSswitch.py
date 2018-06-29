@@ -30,7 +30,7 @@ sw1_name = '/Down'
 ########################  Schedule 0  #################
 # Select One
 local_schedule_0 = None
-sched_filename_0 = homedir + '/test_sched_up.txt'
+sched_filename_0 = homedir + '/sched_up.txt'
 #######################################################
 
 
@@ -38,7 +38,7 @@ sched_filename_0 = homedir + '/test_sched_up.txt'
 # Select One
 # DoubleSwitch only
 local_schedule_1 = None
-sched_filename_1 = homedir + '/test_sched_down.txt'
+sched_filename_1 = homedir + '/sched_down.txt'
 #######################################################
 
 
@@ -57,8 +57,10 @@ if len(argv) > 0:
         print('-u<state> -d<state>')
         sys.exit(2)
 
-    a = HomePiLocalSwitch(switch_type='double', gpio_in=[20, 21], gpio_out=[16, 26], mode='press',
-                          ext_log='/home/guy/Documents/%s.log' % (device_name), alias=device_name + 'O/D')
+    a = HomePiLocalSwitch(switch_type='double', gpio_in=[20, 21], 
+            gpio_out=[16, 26], mode='press', 
+            ext_log='/home/guy/Documents/%s.log' % (device_name), 
+            alias=device_name + 'O/D')
 
     switch = ''
     for opt, arg in opts:
@@ -84,22 +86,26 @@ if len(argv) > 0:
 
 else:
     # Run Switch
-    loc_double_switch = HomePiLocalSwitch(switch_type=switch_type, gpio_in=gpio_in,
-                                          gpio_out=gpio_out, mode=mode, ext_log=ext_log, alias=device_name,
-                                          sw0_name=sw0_name, sw1_name=sw1_name)
+    loc_double_switch = HomePiLocalSwitch(switch_type=switch_type, 
+            gpio_in=gpio_in, gpio_out=gpio_out, mode=mode, 
+            ext_log=ext_log, alias=device_name, sw0_name=sw0_name, 
+            sw1_name=sw1_name)
 
     # Run Watch_dog service
     loc_double_switch.use_watch_dog()
 
     # Run Local schedule
-    loc_double_switch.weekly_schedule(local_schedule_0=local_schedule_0, sched_filename_0=sched_filename_0,
-                                      local_schedule_1=local_schedule_1, sched_filename_1=sched_filename_1)
+    loc_double_switch.weekly_schedule(local_schedule_0=local_schedule_0, 
+            sched_filename_0=sched_filename_0, local_schedule_1=local_schedule_1, 
+            sched_filename_1=sched_filename_1)
 
     # Run Gmail defs
-    loc_double_switch.gmail_defs(recipients=recps, sender_file=s_file, password_file=p_file)
+    loc_double_switch.gmail_defs(recipients=recps, sender_file=s_file, 
+            password_file=p_file)
 
     # Notify after boot
-    loc_double_switch.notify_by_mail(subj='HomePi:%s boot summery' % device_name, body='Device loaded successfully @%s'%getip.get_ip()[0])
+    loc_double_switch.notify_by_mail(subj='HomePi:%s boot summery' % device_name, 
+            body='Device loaded successfully @%s'%getip.get_ip()[0])
 
     # Boot test
     if switch_type == 'double':
