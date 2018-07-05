@@ -229,7 +229,7 @@ class SingleSwitch:
 
     def start_gpio_hw(self):
         try:
-            self.button = gpiozero.Button(self.button_pin,bounce_time=1)
+            self.button = gpiozero.Button(self.button_pin)#,bounce_time=1)
             self.relay = gpiozero.OutputDevice(self.relay_pin)
 
             if self.mode == 'toggle':
