@@ -247,7 +247,7 @@ class SingleSwitch:
 
     def press_switch(self, add=''):
         """ Press state only"""
-        sleep(0.5)
+        sleep(0.1)
 
         # Case of DoubleSwitch
         self.off_other_switch()
@@ -262,7 +262,7 @@ class SingleSwitch:
 
     def release_switch(self, add=''):
         """ Press state only"""
-        sleep(0.5)
+        sleep(0.1)
 
         # Case of DoubleSwitch
         self.off_other_switch()
