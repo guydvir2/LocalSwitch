@@ -19,10 +19,8 @@ except ImportError:  # ModuleNotFoundError:
 try:
     main_path = '/home/guy/github/modules'
     path.append(main_path)
-    # import my_paths
     from gmail_mod import GmailSender
     import getip
-    # import use_lcd
     import scheduler
 
     my_modules = True
@@ -32,75 +30,75 @@ except ImportError:
     print('Fail to obtain one or more RaspberryPi modules')
     # quit()
 
-
-class Output2LCD:
-    """ This class outputs data to 2 lines of LCD matrix,
-    parameters:
-    1)switches - max of 2 lines od data
-    2) ext_log - use class Log2File to save what displayed on LCD"""
-
-    def __init__(self, switches, ext_log=None):
-        self.switches = switches
-        self.boot_success = False
-        self.log = ext_log
-        try:
-            # Case of HW err
-            self.lcd_display = use_lcd.MyLCD()
-            self.t = threading.Thread(name='thread_disp_lcd', target=self.display_status_loop)
-            self.t.start()
-            self.boot_success = True
-        except OSError:
-            msg = "LCD hardware error"
-            try:
-                self.log.append_log(msg)
-            except AttributeError:
-                pass
-            finally:
-                print(msg)
-
-    def display_status_loop(self):
-        while True:
-            self.disp_switch_status(time2show=3)
-            self.disp_time(time2show=3)
-
-    def disp_switch_status(self, time2show=2):
-        # time to display relays status on LCD
-        t1 = 0
-        t_stamp = datetime.datetime.now()
-        status = [[] for i in range(len(self.switches))]
-        last_status = [[] for i in range(len(self.switches))]
-        self.lcd_display.clear_lcd()
-
-        while t1 < time2show:
-            textonlcd = ['', '']
-            for i, current_switch in enumerate(self.switches):
-                # Detect change
-                if last_status[i] != current_switch.switch_state[0]:
-                    if current_switch.switch_state[0] is False:
-                        s = 'off'
-                    elif current_switch.switch_state[0] is True:
-                        s = 'on '
-                    status[i] = '%s :%s' % (current_switch.name, s)
-                    try:
-                        textonlcd[i] = str(status[i])
-                        self.log.append_log(status[i], time_stamp=1)
-                    except AttributeError:
-                        pass
-                    last_status[i] = current_switch.switch_state[0]
-                    self.lcd_display.center_str(textonlcd[0], textonlcd[1])
-            # take it easy :)
-            time.sleep(0.5)
-            t1 = (datetime.datetime.now() - t_stamp).total_seconds()
-
-    def disp_time(self, time2show=5):
-        t2 = 0
-        t_stamp = datetime.datetime.now()
-        self.lcd_display.clear_lcd()
-        while t2 < time2show:
-            time_now = str(datetime.datetime.now())[:-5].split(' ')
-            self.lcd_display.center_str(text1=time_now[0], text2=time_now[1])
-            t2 = (datetime.datetime.now() - t_stamp).total_seconds()
-
+#
+# class Output2LCD:
+#     """ This class outputs data to 2 lines of LCD matrix,
+#     parameters:
+#     1)switches - max of 2 lines od data
+#     2) ext_log - use class Log2File to save what displayed on LCD"""
+#
+#     def __init__(self, switches, ext_log=None):
+#         self.switches = switches
+#         self.boot_success = False
+#         self.log = ext_log
+#         try:
+#             # Case of HW err
+#             self.lcd_display = use_lcd.MyLCD()
+#             self.t = threading.Thread(name='thread_disp_lcd', target=self.display_status_loop)
+#             self.t.start()
+#             self.boot_success = True
+#         except OSError:
+#             msg = "LCD hardware error"
+#             try:
+#                 self.log.append_log(msg)
+#             except AttributeError:
+#                 pass
+#             finally:
+#                 print(msg)
+#
+#     def display_status_loop(self):
+#         while True:
+#             self.disp_switch_status(time2show=3)
+#             self.disp_time(time2show=3)
+#
+#     def disp_switch_status(self, time2show=2):
+#         # time to display relays status on LCD
+#         t1 = 0
+#         t_stamp = datetime.datetime.now()
+#         status = [[] for i in range(len(self.switches))]
+#         last_status = [[] for i in range(len(self.switches))]
+#         self.lcd_display.clear_lcd()
+#
+#         while t1 < time2show:
+#             textonlcd = ['', '']
+#             for i, current_switch in enumerate(self.switches):
+#                 # Detect change
+#                 if last_status[i] != current_switch.switch_state[0]:
+#                     if current_switch.switch_state[0] is False:
+#                         s = 'off'
+#                     elif current_switch.switch_state[0] is True:
+#                         s = 'on '
+#                     status[i] = '%s :%s' % (current_switch.name, s)
+#                     try:
+#                         textonlcd[i] = str(status[i])
+#                         self.log.append_log(status[i], time_stamp=1)
+#                     except AttributeError:
+#                         pass
+#                     last_status[i] = current_switch.switch_state[0]
+#                     self.lcd_display.center_str(textonlcd[0], textonlcd[1])
+#             # take it easy :)
+#             time.sleep(0.5)
+#             t1 = (datetime.datetime.now() - t_stamp).total_seconds()
+#
+#     def disp_time(self, time2show=5):
+#         t2 = 0
+#         t_stamp = datetime.datetime.now()
+#         self.lcd_display.clear_lcd()
+#         while t2 < time2show:
+#             time_now = str(datetime.datetime.now())[:-5].split(' ')
+#             self.lcd_display.center_str(text1=time_now[0], text2=time_now[1])
+#             t2 = (datetime.datetime.now() - t_stamp).total_seconds()
+#
 
 class Log2File:
     def __init__(self, filename, screen=0, time_in_log=0, name_of_master=''):
@@ -226,14 +224,14 @@ class SingleSwitch:
             self.log_record('init [%s mode][GPIO in/out:%s/%s] ' % (self.mode, self.button_pin, self.relay_pin))
         else:
             self.log_record('err- modes can be "toggle" or "press" only')
+            quit()
 
     def start_gpio_hw(self):
         try:
-            self.button = gpiozero.Button(self.button_pin)#,bounce_time=1)
+            self.button = gpiozero.Button(self.button_pin)
             self.relay = gpiozero.OutputDevice(self.relay_pin)
 
             if self.mode == 'toggle':
-                pass
                 self.button.when_pressed = self.toggle_switch
             elif self.mode == 'press':
                 self.button.when_pressed = self.press_switch
@@ -297,10 +295,9 @@ class SingleSwitch:
     def switch_state(self):
         return [self.relay.value, self.button.value]
 
-    """ Using for code change state- allways as toggle"""
-
     @switch_state.setter
     def switch_state(self, value):
+        # Using for code change state- allways as toggle
 
         if value == 0:
             if self.relay.value is True:
