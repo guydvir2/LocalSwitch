@@ -26,7 +26,7 @@ def mqtt_commands(msg):
         mqtt_agent.pub(state_0)
         mqtt_agent.pub(state_1)
     else:
-        print('Unrecognized command')
+        print(msg, 'Unrecognized command')
 
 
 ################## Path Parameters ##################
