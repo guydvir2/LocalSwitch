@@ -228,7 +228,8 @@ class SingleSwitch:
 
     def start_gpio_hw(self):
         try:
-            self.button = gpiozero.Button(self.button_pin)
+            #self.button = gpiozero.Button(self.button_pin)
+            self.button = gpiozero.Button(self.button_pin, pull_up=True)
             self.relay = gpiozero.OutputDevice(self.relay_pin)
 
             if self.mode == 'toggle':
@@ -245,6 +246,7 @@ class SingleSwitch:
 
     def press_switch(self, add=''):
         """ Press state only"""
+        sleep(0.1)
 
         # Case of DoubleSwitch
         self.off_other_switch()
@@ -259,6 +261,7 @@ class SingleSwitch:
 
     def release_switch(self, add=''):
         """ Press state only"""
+        sleep(0.1)
 
         # Case of DoubleSwitch
         self.off_other_switch()
@@ -472,13 +475,13 @@ class HomePiLocalSwitch:
 
 if __name__ == "__main__":
         
-    #b=HomePiLocalSwitch(switch_type='single',gpio_in=20, gpio_out=16,mode='press',ext_log='/home/guy/Documents/log.log')
-    #b.weekly_schedule(local_schedule_0={'start_days': [3], 'start_time': '19:03:00', 'end_days': [4], 'end_time': '23:08:00'})
+    b=HomePiLocalSwitch(switch_type='single',gpio_in=21, gpio_out=16,mode='press',ext_log='/home/guy/Documents/log.log')
+    b.weekly_schedule(local_schedule_0={'start_days': [3], 'start_time': '19:03:00', 'end_days': [4], 'end_time': '23:08:00'})
     
-    a = HomePiLocalSwitch(switch_type='double', gpio_in=[20, 21], gpio_out=[16, 26], mode='press',
-                         ext_log='/home/guy/Documents/log.log')
-    #a.use_watch_dog()
-    #a.use_lcd()
-    a.weekly_schedule(local_schedule_1={'start_days': [3], 'start_time': '19:03:00', 'end_days': [4], 'end_time': '23:08:00'})
-    #, sched_filename_1='/home/guy/Documents/github/Rpi/modules/sched1.txt')
-    a.gmail_defs(recipients=['guydvir.tech@gmail.com'], sender_file='/home/guy/Documents/github/Rpi/modules/ufile.txt',password_file='/home/guy/Documents/github/Rpi/modules/pfile.txt')
+    #a = HomePiLocalSwitch(switch_type='double', gpio_in=[20, 21], gpio_out=[16, 26], mode='press',
+                         #ext_log='/home/guy/Documents/log.log')
+    ##a.use_watch_dog()
+    ##a.use_lcd()
+    #a.weekly_schedule(local_schedule_1={'start_days': [3], 'start_time': '19:03:00', 'end_days': [4], 'end_time': '23:08:00'})
+    ##, sched_filename_1='/home/guy/Documents/github/Rpi/modules/sched1.txt')
+    #a.gmail_defs(recipients=['guydvir.tech@gmail.com'], sender_file='/home/guy/Documents/github/Rpi/modules/ufile.txt',password_file='/home/guy/Documents/github/Rpi/modules/pfile.txt')
