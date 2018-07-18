@@ -84,7 +84,7 @@ mqtt_host = 'iot.eclipse.org'  # external
 main_topic = '/HomePi/Dvir/'
 group_topic = main_topic + 'Windows/'
 msg_topic = main_topic + 'Messages'
-device_topic = main_topic + group_topic + device_name
+device_topic = group_topic + device_name
 
 #######################################################
 # Run Switch
