@@ -23,8 +23,8 @@ def mqtt_commands(msg):
             device_name + sw1_name, loc_double_switch.switch.switch1.switch_state[0],
             loc_double_switch.switch.switch1.switch_state[1])
 
-        mqtt_agent.pub(state_0)
-        mqtt_agent.pub(state_1)
+        mqtt_agent.pub(topic=msg_topic, payload=state_0)
+        mqtt_agent.pub(topic= msg_topic, payload=state_1)
     else:
         print(msg, 'Unrecognized command')
 
@@ -81,8 +81,10 @@ sched_filename_1 = homedir + '/sched_down.txt'
 ####################  MQTT parameters  #################
 # mqtt_host='192.168.2.113' #internal
 mqtt_host = 'iot.eclipse.org'  # external
-heir_topic = '/HomePi/Dvir/Windows/'
-device_topic = heir_topic + device_name
+main_topic = '/HomePi/Dvir/'
+group_topic = main_topic + 'Windows/'
+msg_topic = main_topic + 'Messages'
+device_topic = main_topic + group_topic + device_name
 
 #######################################################
 # Run Switch
