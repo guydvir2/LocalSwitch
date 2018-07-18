@@ -14,9 +14,16 @@ def mqtt_commands(msg):
     elif msg.upper() == 'DOWN':
         loc_double_switch.switch.switch1.switch_state = 1
     elif msg.upper() == 'STATUS':
-        print(loc_double_switch.switch.switch0.switch_state)
-        print(loc_double_switch.switch.switch1.switch_state)
-        print("info")
+        
+        print("[%s] state is: %d, Wall switch state is: %d" % (
+                device_name + sw0_name, loc_double_switch.switch.switch0.switch_state[0],
+                loc_double_switch.switch.switch0.switch_state[1]))
+
+        print("[%s] state is: %d, Wall switch state is: %d" % (
+            device_name + sw0_name, loc_double_switch.switch.switch1.switch_state[0],
+            loc_double_switch.switch.switch1.switch_state[1]))
+
+        # print(loc_double_switch.switch.switch1.switch_state)
     else:
         print('Unrecognized command')
 
