@@ -23,8 +23,8 @@ def mqtt_commands(msg):
             device_name + sw1_name, loc_double_switch.switch.switch1.switch_state[0],
             loc_double_switch.switch.switch1.switch_state[1])
 
-        mqtt_agent.pub(topic=msg_topic, payload=state_0)
-        mqtt_agent.pub(topic= msg_topic, payload=state_1)
+        mqtt_agent.pub(topic=msg_topic, payload=state_0+'\n'+state_1)
+        #mqtt_agent.pub(topic= msg_topic, payload=state_1)
     else:
         print(msg, 'Unrecognized command')
 
@@ -34,9 +34,10 @@ base_path = '/home/guy/github'
 main_path = base_path + '/LocalSwitch'
 sub_path = '/FamilyRoomWindow'
 mod_path = base_path + '/RemoteSwitch'
+homedir = main_path + sub_path
 path.append(mod_path)
 path.append(main_path)
-homedir = main_path + sub_path
+
 from localswitches import HomePiLocalSwitch
 from mqtt_switch import MQTTClient
 import getip
