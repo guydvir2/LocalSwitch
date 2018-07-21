@@ -51,7 +51,7 @@ def get_confile_location():
 
 ################## Path Parameters ##################
 file_param = {}
-confloc = '/Users/guy/github/LocalSwitch/ParentsRoomWindow/'
+confloc = '/home/guy/github/LocalSwitch/ParentsRoomWindow/'
 get_confile_location()
 confile_name = 'DSswitch.conf'
 read_conf_file(confloc + confile_name)
@@ -64,23 +64,21 @@ path.append(main_path)
 
 from localswitches import HomePiLocalSwitch
 from mqtt_switch import MQTTClient
-
 import getip
-
 ######################################################
 
 ################## Switch Parameters #################
 device_name = file_param["DEVICE_NAME"]
-switch_type = 'double'
-gpio_in = file_param["GPIO_IN"]
-gpio_out = file_param["GPIO_OUT"]
-mode = 'press'
-ext_log = homedir + '/%s.log' % device_name
+gpio_in = [int(file_param["GPIO_IN"].split(',')[0]),int(file_param["GPIO_IN"].split(',')[1])]
+gpio_out = [int(file_param["GPIO_OUT"].split(',')[0]),int(file_param["GPIO_OUT"].split(',')[1])]
+ext_log = homedir + '%s.log' % device_name
 recps = ['guydvir.tech@gmail.com']
 s_file = main_path + 'ufile.txt'
 p_file = main_path + 'pfile.txt'
 sw0_name = '/Up'
 sw1_name = '/Down'
+mode = 'press'
+switch_type = 'double'
 #######################################################
 
 ########################  Schedule 0  #################
@@ -107,16 +105,16 @@ sched_filename_1 = homedir + file_param["SCHED_DOWN"]
 ####################  MQTT parameters  #################
 # mqtt_host='192.168.2.113' #internal
 mqtt_host = 'iot.eclipse.org'  # external
-main_topic = '/HomePi/Dvir/'
-group_topic = main_topic + 'Windows/'
-msg_topic = main_topic + 'Messages'
-device_topic = group_topic + device_name
+main_topic = file_param["MAIN_TOPIC"]
+group_topic = file_param["GROUP_TOPIC"]
+msg_topic = file_param["MSG_TOPIC"]
+device_topic = file_param["DEVICE_TOPIC"]
 #######################################################
 
 # Run Switch
 loc_double_switch = HomePiLocalSwitch(switch_type=switch_type,
                                       gpio_in=gpio_in, gpio_out=gpio_out, mode=mode,
-                                      ext_log=ext_log, alias¬=device_name, sw0_name=sw0_name,
+                                      ext_log=ext_log, alias=device_name, sw0_name=sw0_name,
                                       sw1_name=sw1_name)
 
 # Run Watch_dog service
@@ -131,7 +129,6 @@ if file_param["ENABLE_SCHED"] == 'True':
 # Run Gmail defs
 loc_double_switch.gmail_defs(recipients=recps, sender_file=s_file,
                              password_file=p_file)
-
 # Notify after boot
 loc_double_switch.notify_by_mail(subj='HomePi:%s boot summery' % device_name,
                                  body='Device loaded successfully @%s' % getip.get_ip()[0])
