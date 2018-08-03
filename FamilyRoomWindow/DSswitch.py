@@ -3,31 +3,52 @@ import getopt
 from time import sleep
 import os
 from sys import path
+import datetime
 
 
 def mqtt_commands(msg):
     if msg.upper() == 'UP':
         loc_double_switch.switch.switch0.switch_state = 1
+        pub_msg('CMD [UP]')
     elif msg.upper() == 'STOP':
         loc_double_switch.switch.switch0.switch_state = 0
         loc_double_switch.switch.switch1.switch_state = 0
+        pub_msg('CMD [STOP]')
+
     elif msg.upper() == 'DOWN':
         loc_double_switch.switch.switch1.switch_state = 1
+        pub_msg('CMD [DOWN]')
+
     elif msg.upper() == 'STATUS':
 
         state_0 = "[%s] state is: %d, Wall switch state is: %d" % (
-            device_name + sw0_name, loc_double_switch.switch.switch0.switch_state[0],
+            sw0_name, loc_double_switch.switch.switch0.switch_state[0],
             loc_double_switch.switch.switch0.switch_state[1])
 
         state_1 = "[%s] state is: %d, Wall switch state is: %d" % (
-            device_name + sw1_name, loc_double_switch.switch.switch1.switch_state[0],
+            sw1_name, loc_double_switch.switch.switch1.switch_state[0],
             loc_double_switch.switch.switch1.switch_state[1])
 
-        mqtt_agent.pub(topic=msg_topic, payload=state_0+'\n'+state_1)
-        #mqtt_agent.pub(topic= msg_topic, payload=state_1)
+        pub_msg(state_0+'; '+state_1)
     else:
-        print(msg, 'Unrecognized command')
+        pass
+        #mqtt_agent.pub(payload='[%s] CMD [Unrecognaized]'%device_name, topic=msg_topic)
 
+def pub_msg(msg):
+    time_stamp = '['+str(datetime.datetime.now())[:-5]+']'
+    mqtt_agent.pub(payload='%s [%s] %s'%(time_stamp, device_name, msg), topic=msg_topic)
+    
+    
+
+def PBit():
+    if switch_type == 'double':
+        loc_double_switch.switch.switch0.switch_state = 1
+        sleep(0.5)
+        loc_double_switch.switch.switch0.switch_state = 0
+        sleep(0.5)
+        loc_double_switch.switch.switch1.switch_state = 1
+        sleep(0.5)
+        loc_double_switch.switch.switch1.switch_state = 0
 
 ################## Path Parameters ##################
 base_path = '/home/guy/github'
@@ -80,12 +101,12 @@ sched_filename_1 = homedir + '/sched_down.txt'
 
 
 ####################  MQTT parameters  #################
-# mqtt_host='192.168.2.113' #internal
-mqtt_host = 'iot.eclipse.org'  # external
-main_topic = '/HomePi/Dvir/'
-group_topic = main_topic + 'Windows/'
-msg_topic = main_topic + 'Messages'
-device_topic = group_topic + device_name
+mqtt_host='192.168.2.113' #internal
+#mqtt_host = 'iot.eclipse.org'  # external
+main_topic = 'HomePi/Dvir/Windows/'
+group_topic = main_topic + 'All'
+msg_topic = 'HomePi/Dvir/Messages'
+device_topic = 'HomePi/Dvir/Windows/'+'Window1'
 
 #######################################################
 # Run Switch
@@ -98,29 +119,24 @@ loc_double_switch = HomePiLocalSwitch(switch_type=switch_type,
 loc_double_switch.use_watch_dog()
 
 # Run Local schedule
-loc_double_switch.weekly_schedule(local_schedule_0=local_schedule_0,
-                                  sched_filename_0=sched_filename_0, local_schedule_1=local_schedule_1,
-                                  sched_filename_1=sched_filename_1)
+#loc_double_switch.weekly_schedule(local_schedule_0=local_schedule_0,
+                                  #sched_filename_0=sched_filename_0, local_schedule_1=local_schedule_1,
+                                  #sched_filename_1=sched_filename_1)
 
 # Run Gmail defs
-loc_double_switch.gmail_defs(recipients=recps, sender_file=s_file,
-                             password_file=p_file)
+#loc_double_switch.gmail_defs(recipients=recps, sender_file=s_file,
+                             #password_file=p_file)
 
-# Notify after boot
-loc_double_switch.notify_by_mail(subj='HomePi:%s boot summery' % device_name,
-                                 body='Device loaded successfully @%s' % getip.get_ip()[0])
+## Notify after boot
+#loc_double_switch.notify_by_mail(subj='HomePi:%s boot summery' % device_name,
+                                 #body='Device loaded successfully @%s' % getip.get_ip()[0])
 
 # Run MQTT protocol
 mqtt_agent = MQTTClient(sid=device_name, topic=device_topic, topic_qos=0, host=mqtt_host)
 mqtt_agent.call_externalf = lambda: mqtt_commands(mqtt_agent.arrived_msg)
 mqtt_agent.start()
+sleep(1)
+pub_msg('System Boot')
 
 # Boot test
-if switch_type == 'double':
-    loc_double_switch.switch.switch0.switch_state = 1
-    sleep(0.5)
-    loc_double_switch.switch.switch0.switch_state = 0
-    sleep(0.5)
-    loc_double_switch.switch.switch1.switch_state = 1
-    sleep(0.5)
-    loc_double_switch.switch.switch1.switch_state = 0
+PBit()
