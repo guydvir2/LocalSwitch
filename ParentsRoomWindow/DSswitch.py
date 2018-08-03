@@ -103,8 +103,8 @@ sched_filename_1 = homedir + file_param["SCHED_DOWN"]
 
 
 ####################  MQTT parameters  #################
-# mqtt_host='192.168.2.113' #internal
-mqtt_host = 'iot.eclipse.org'  # external
+mqtt_host='192.168.2.113' #internal
+# mqtt_host = 'iot.eclipse.org'  # external
 main_topic = file_param["MAIN_TOPIC"]
 group_topic = file_param["GROUP_TOPIC"]
 msg_topic = file_param["MSG_TOPIC"]
