@@ -29,7 +29,7 @@ def read_conf_file(confile):
             data_file = f.readlines()
             for line in data_file:
                 # skip empty line in conf file or commented line
-                if line.strip() != '' or '#' in line.strip():
+                if line.strip() != '':
                     file_param[line.split('=')[0].strip()] = line.split('=')[1].split('\n')[0].strip()
     else:
         print('file', confile, ' not found')
@@ -94,13 +94,13 @@ def pub_msg(msg):
 
 ################## Path Parameters ##################
 file_param = {}
-confloc = '/home/guy/github/LocalSwitch/ParentsRoomWindow/'
+confloc = '/home/guy/github/LocalSwitch/rooms/ParentsRoomWindow/'
 confile_path_cmdline()
-confile_name = 'DSswitch.conf'
+confile_name = 'HomePi_SW.conf'
 read_conf_file(confloc + confile_name)
-base_path = '/home/guy/github/'
-main_path = base_path + 'LocalSwitch/'
-mod_path = base_path + 'RemoteSwitch/'
+base_path = file_param["BASE_PATH"]
+main_path = file_param["MAIN_PATH"]
+mod_path = file_param["MOD_PATH"]
 homedir = confloc
 path.append(mod_path)
 path.append(main_path)
@@ -164,10 +164,10 @@ loc_double_switch.use_watch_dog()
 #start_schedule()
 
 ## Run Gmail service
-start_gmail()
+#start_gmail()
 
 ## Notify after boot
-loc_double_switch.notify_by_mail(subj='HomePi:%s boot summery' % device_name,body='Device loaded successfully @%s' % getip.get_ip()[0])
+#loc_double_switch.notify_by_mail(subj='HomePi:%s boot summery' % device_name,body='Device loaded successfully @%s' % getip.get_ip()[0])
 
 # Run MQTT service
 start_mqtt_service()
