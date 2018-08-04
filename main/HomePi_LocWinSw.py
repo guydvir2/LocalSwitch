@@ -48,6 +48,7 @@ def confile_path_cmdline():
 
 def start_gmail():
     ## Run Gmail defs
+    global s_file, p_file
     recps = ['guydvir.tech@gmail.com']
     loc_double_switch.gmail_defs(recipients=recps, sender_file=s_file,
                                  password_file=p_file)
