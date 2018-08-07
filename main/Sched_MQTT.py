@@ -14,10 +14,12 @@ from mqtt_switch import MQTTClient
 
 
 class MQTTRemoteSchedule:
-    def __init__(self, master_topic, pub_topics, msg_topic, device_name, broker='192.168.2.113', qos=0, active=True):
+    def __init__(self, master_topic, pub_topics, msg_topic, device_name=None, broker='192.168.2.113', qos=0,
+                 active=True):
         self.param_file, self.confile_loc = None, None
         self.def_sched_down_1, self.def_sched_down_2 = {}, {}
         self.def_sched_up_1, self.def_sched_up_2 = {}, {}
+        device_name = master_topic.split('/')[-1] + '_SCHD'
         self.pub_topics, self.msg_topic = [pub_topics, master_topic + '_SCHD'], msg_topic
         self.broker, self.master_topic = broker, master_topic
         self.active_schedule_flag = active
@@ -37,22 +39,27 @@ class MQTTRemoteSchedule:
         self.pub_msg(msg_topic=self.msg_topic, msg='Schedule is UP')
 
     def mqtt_commands(self, msg):
-        msg_codes = [0, 1, 2, 3, 4, 5, 6]
+        msg_codes = ['0', '1', '2', '3', '4', '5', '6']
         msg_text = ['UP', 'DOWN', 'OFF', 'STATUS', 'DIS_SHCD', 'ENB_SCHD', 'REPORT']
-        if msg.upper() == msg_text[0] or msg_codes[0]:
-            self.pub_msg(msg_text[0].lower())
+        if msg.upper() == msg_text[0] or msg.upper() == msg_codes[0]:
+            if self.active_schedule_flag is True:
+                self.pub_msg(msg_text[0].lower())
         elif msg.upper() == msg_text[1] or msg.upper() == msg_codes[1]:
-            self.pub_msg(msg_text[1].lower())
+            if self.active_schedule_flag is True:
+                self.pub_msg(msg_text[1].lower())
         elif msg.upper() == msg_text[2] or msg.upper() == msg_codes[2]:
-            self.pub_msg(msg_text[2].lower())
+            if self.active_schedule_flag is True:
+                self.pub_msg(msg_text[2].lower())
         elif msg.upper() == msg_text[3] or msg.upper() == msg_codes[3]:
             self.pub_msg(msg_text[3].lower())
         elif msg.upper() == msg_text[4] or msg.upper() == msg_codes[4]:
-            self.pub_msg(msg_text[4].lower())
+            self.active_schedule_flag = False
+            self.pub_msg(msg_topic=self.msg_topic, msg='Schedule Disabled')
         elif msg.upper() == msg_text[5] or msg.upper() == msg_codes[5]:
-            self.pub_msg(msg_text[5].lower())
-        elif msg.upper() == msg_text[6] or msg.upper() == msg_codes[6]:
-            a = self.schedule_up.tasks_descriptive()
+            self.active_schedule_flag = True
+            self.pub_msg(msg_topic=self.msg_topic, msg='Schedule Enabled')
+        elif msg.upper() == msg_text[6]:  # or msg.upper() == msg_codes[6]:
+            a = self.schedule_up.weekly_tasks_list
             print(a)
             # self.pub_msg(msg_text[6].lower())
         else:
@@ -63,7 +70,7 @@ class MQTTRemoteSchedule:
             msg_topic = self.master_topic
         else:
             time_stamp = '[' + str(datetime.datetime.now())[:-5] + ']'
-            msg = '%s [%s] %s' % (time_stamp, self.master_topic.split('/')[-1], msg)
+            msg = '%s [%s] %s' % (time_stamp, self.master_topic, msg)
 
         self.mqtt_agent.pub(payload=msg, topic=msg_topic)
 
@@ -83,9 +90,9 @@ class MQTTRemoteSchedule:
 
     def default_schedules(self):
         self.def_sched_up_1 = {'start_days': [1, 2, 3, 4, 5], 'start_time': '06:30:00',
-                               'end_days': [1, 2, 3, 4, 5], 'end_time': '21:30:05'}
-        self.def_sched_up_2 = {'start_days': [1, 2, 3, 4, 5, 6, 7], 'start_time': '02:00:00',
-                               'end_days': [1, 2, 3, 4, 5, 6, 7], 'end_time': '02:00:05'}
+                               'end_days': [1, 2, 3, 4, 5], 'end_time': '06:30:05'}
+        self.def_sched_up_2 = {'start_days': [1, 2, 3, 4, 5, 6, 7], 'start_time': '00:00:00',
+                               'end_days': [1, 2, 3, 4, 5, 6, 7], 'end_time': '00:00:05'}
 
         self.def_sched_down_1 = {'start_days': [1, 2, 3, 4, 5], 'start_time': '08:00:00',
                                  'end_days': [1, 2, 3, 4, 5], 'end_time': '08:00:59'}
@@ -93,5 +100,6 @@ class MQTTRemoteSchedule:
                                  'end_days': [1, 2, 3, 4, 5, 6, 7], 'end_time': '01:59:59'}
 
 
-first_sucker = MQTTRemoteSchedule(master_topic='HomePi/Dvir/Windows/ESP32', pub_topics='HomePi/Dvir/Windows/SCHDS',
-                                  device_name='SCH', msg_topic='HomePi/Dvir/Messages')
+Home_Devices = ['HomePi/Dvir/Windows/ESP32', 'HomePi/Dvir/Windows/S2-RoomWindow', 'HomePi/Dvir/Windows/P-RoomWindow']
+for client in Home_Devices:
+    MQTTRemoteSchedule(master_topic=client, pub_topics='HomePi/Dvir/Windows/SCHDS', msg_topic='HomePi/Dvir/Messages')
