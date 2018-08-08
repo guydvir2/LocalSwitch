@@ -44,12 +44,16 @@ class MQTTRemoteSchedule:
         if msg.upper() == msg_text[0] or msg.upper() == msg_codes[0]:
             if self.active_schedule_flag is True:
                 self.pub_msg(msg_text[0].lower())
+            else:
+                self.pub_msg(msg_topic=self.msg_topic, msg='Schedule canceled')
         elif msg.upper() == msg_text[1] or msg.upper() == msg_codes[1]:
             if self.active_schedule_flag is True:
                 self.pub_msg(msg_text[1].lower())
+            self.pub_msg(msg_topic=self.msg_topic, msg='Schedule canceled')
         elif msg.upper() == msg_text[2] or msg.upper() == msg_codes[2]:
             if self.active_schedule_flag is True:
                 self.pub_msg(msg_text[2].lower())
+            self.pub_msg(msg_topic=self.msg_topic, msg='Schedule canceled')
         elif msg.upper() == msg_text[3] or msg.upper() == msg_codes[3]:
             self.pub_msg(msg_text[3].lower())
         elif msg.upper() == msg_text[4] or msg.upper() == msg_codes[4]:
@@ -100,6 +104,6 @@ class MQTTRemoteSchedule:
                                  'end_days': [1, 2, 3, 4, 5, 6, 7], 'end_time': '01:59:59'}
 
 
-Home_Devices = ['HomePi/Dvir/Windows/ESP32', 'HomePi/Dvir/Windows/S2-RoomWindow', 'HomePi/Dvir/Windows/P-RoomWindow']
+Home_Devices = ['HomePi/Dvir/Windows/ESP32', 'HomePi/Dvir/Windows/S2-RoomWindow', 'HomePi/Dvir/Windows/S1-RoomWindow']#, 'HomePi/Dvir/Windows/P-RoomWindow']
 for client in Home_Devices:
     MQTTRemoteSchedule(master_topic=client, pub_topics='HomePi/Dvir/Windows/SCHDS', msg_topic='HomePi/Dvir/Messages')
