@@ -170,7 +170,7 @@ start_switch_code()
 loc_double_switch.use_watch_dog()
 
 # Run Local schedule
-start_schedule()
+#start_schedule()
 
 ## Run Gmail service
 start_gmail()
