@@ -93,10 +93,10 @@ class MQTTRemoteSchedule:
         self.schedule_down.start()
 
     def default_schedules(self):
-        self.def_sched_up_1 = {'start_days': [1, 2, 3, 4, 5], 'start_time': '06:30:00',
-                               'end_days': [1, 2, 3, 4, 5], 'end_time': '06:30:05'}
-        self.def_sched_up_2 = {'start_days': [1, 2, 3, 4, 5, 6, 7], 'start_time': '00:00:00',
-                               'end_days': [1, 2, 3, 4, 5, 6, 7], 'end_time': '00:00:05'}
+        self.def_sched_up_1 = {'start_days': [1, 2, 3, 4, 5], 'start_time': '06:05:00',
+                               'end_days': [1, 2, 3, 4, 5], 'end_time': '06:06:05'}
+        self.def_sched_up_2 = {'start_days': [1, 2, 3, 4, 5, 6, 7], 'start_time': '02:00:00',
+                               'end_days': [1, 2, 3, 4, 5, 6, 7], 'end_time': '02:00:05'}
 
         self.def_sched_down_1 = {'start_days': [1, 2, 3, 4, 5], 'start_time': '08:00:00',
                                  'end_days': [1, 2, 3, 4, 5], 'end_time': '08:00:59'}
@@ -104,6 +104,6 @@ class MQTTRemoteSchedule:
                                  'end_days': [1, 2, 3, 4, 5, 6, 7], 'end_time': '01:59:59'}
 
 
-Home_Devices = ['HomePi/Dvir/Windows/ESP32', 'HomePi/Dvir/Windows/S2-RoomWindow', 'HomePi/Dvir/Windows/S1-RoomWindow']#, 'HomePi/Dvir/Windows/P-RoomWindow']
+Home_Devices = ['HomePi/Dvir/Windows/ESP32', 'HomePi/Dvir/Windows/S2-RoomWindow', 'HomePi/Dvir/Windows/S1-RoomWindow', 'HomePi/Dvir/Windows/P-RoomWindow']
 for client in Home_Devices:
     MQTTRemoteSchedule(master_topic=client, pub_topics='HomePi/Dvir/Windows/SCHDS', msg_topic='HomePi/Dvir/Messages')
