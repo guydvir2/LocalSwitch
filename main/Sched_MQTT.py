@@ -14,9 +14,9 @@ from mqtt_switch import MQTTClient
 
 
 class MQTTRemoteSchedule:
-    def __init__(self, master_topic, pub_topics, msg_topic, device_name=None, broker='192.168.2.113', qos=0,
-                 active=True):
+    def __init__(self, master_topic, pub_topics, msg_topic, broker='192.168.2.113', qos=0, active=True):
         self.param_file, self.confile_loc = None, None
+
         self.def_sched_down_1, self.def_sched_down_2 = {}, {}
         self.def_sched_up_1, self.def_sched_up_2 = {}, {}
         device_name = master_topic.split('/')[-1] + '_SCHD'
@@ -30,6 +30,7 @@ class MQTTRemoteSchedule:
         self.start_up_schedule()
         self.start_down_schedule()
 
+    # MQTT section
     def start_mqtt_service(self, device_name, qos):
         self.mqtt_agent = MQTTClient(sid=device_name, topics=self.pub_topics, topic_qos=qos, host=self.broker)
         self.mqtt_agent.call_externalf = lambda: self.mqtt_commands(self.mqtt_agent.arrived_msg)
@@ -78,6 +79,7 @@ class MQTTRemoteSchedule:
 
         self.mqtt_agent.pub(payload=msg, topic=msg_topic)
 
+    # Schedule section
     def start_up_schedule(self):
         self.schedule_up = scheduler.RunWeeklySchedule(on_func=lambda: self.pub_msg('up'),
                                                        off_func=lambda: self.pub_msg('off'))
@@ -93,17 +95,18 @@ class MQTTRemoteSchedule:
         self.schedule_down.start()
 
     def default_schedules(self):
-        self.def_sched_up_1 = {'start_days': [1, 2, 3, 4, 5], 'start_time': '06:05:00',
-                               'end_days': [1, 2, 3, 4, 5], 'end_time': '06:06:05'}
-        self.def_sched_up_2 = {'start_days': [1, 2, 3, 4, 5, 6, 7], 'start_time': '02:00:00',
-                               'end_days': [1, 2, 3, 4, 5, 6, 7], 'end_time': '02:00:05'}
+        self.def_sched_up_1 = {'start_days': [1, 2, 3, 4, 5], 'start_time': '19:21:30',
+                               'end_days': [1, 2, 3, 4, 5], 'end_time': '19:21:35'}
+        self.def_sched_up_2 = {'start_days': [1, 2, 3, 4, 5, 6, 7], 'start_time': '19:22:00',
+                               'end_days': [1, 2, 3, 4, 5, 6, 7], 'end_time': '19:22:05'}
 
-        self.def_sched_down_1 = {'start_days': [1, 2, 3, 4, 5], 'start_time': '08:00:00',
-                                 'end_days': [1, 2, 3, 4, 5], 'end_time': '08:00:59'}
-        self.def_sched_down_2 = {'start_days': [1, 2, 3, 4, 5, 6, 7], 'start_time': '01:59:00',
-                                 'end_days': [1, 2, 3, 4, 5, 6, 7], 'end_time': '01:59:59'}
+        self.def_sched_down_1 = {'start_days': [1, 2, 3, 4, 5], 'start_time': '19:21:40',
+                                 'end_days': [1, 2, 3, 4, 5], 'end_time': '19:21:59'}
+        self.def_sched_down_2 = {'start_days': [1, 2, 3, 4, 5, 6, 7], 'start_time': '19:22:30',
+                                 'end_days': [1, 2, 3, 4, 5, 6, 7], 'end_time': '19:22:59'}
 
 
-Home_Devices = ['HomePi/Dvir/Windows/ESP32', 'HomePi/Dvir/Windows/S2-RoomWindow', 'HomePi/Dvir/Windows/S1-RoomWindow', 'HomePi/Dvir/Windows/P-RoomWindow']
+Home_Devices = ['HomePi/Dvir/Windows/P-RoomWindow', 'HomePi/Dvir/Windows/ESP32', 'HomePi/Dvir/Windows/S2-RoomWindow',
+                'HomePi/Dvir/Windows/S1-RoomWindow']
 for client in Home_Devices:
     MQTTRemoteSchedule(master_topic=client, pub_topics='HomePi/Dvir/Windows/SCHDS', msg_topic='HomePi/Dvir/Messages')
