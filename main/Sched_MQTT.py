@@ -134,6 +134,6 @@ class MQTTRemoteSchedule:
         sleep(1)
 
 
-Home_Devices = ['HomePi/Dvir/Windows/fRoomWindow', 'HomePi/Dvir/Windows/pRoomWindow','HomePi/Dvir/Windows/ESP8266_1']
+Home_Devices = ['HomePi/Dvir/Windows/fRoomWindow', 'HomePi/Dvir/Windows/pRoomWindow','HomePi/Dvir/Windows/esp8266_1']
 for client in Home_Devices:
     MQTTRemoteSchedule(master_topic=client, pub_topics='HomePi/Dvir/Windows/SCHDS', msg_topic='HomePi/Dvir/Messages')
