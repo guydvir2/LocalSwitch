@@ -203,25 +203,15 @@ class RunWeeklySchedule:
                 self.log_record('End Task[%d/%d]: Start %s, End %s' % (
                    m, n, self.tasks_status[m][n]['start'], self.tasks_status[m][n]['end']))
                 self.convert_weekly_tasks_to_dates()
-                # self.log_record('Task [%d/%d] updated: Start %s, End %s' % (
-                    # m, n, self.tasks_status[m][n]['start'], self.tasks_status[m][n]['end']))
+
 
         def check_conditions_to_switch():
-            # result = []
             for m, task in enumerate(self.tasks_status):
                 for n, sub_task in enumerate(task):
-                    # task is still on
-                    # if sub_task['state'] == 1 and self.engage_task[m][n] == 1:
-                    #     result.append([m, n])
 
                     # detect change from last cycle of check
                     if sub_task['state'] != self.previous_task_status[m][n]:
                         act_on_change([m, n])
-
-                    # # case of external condition to be verified
-                    # if sub_task['state'] == self.engage_task[m][n] and self.engage_task[m][
-                    #     n] != self.ext_cond and self.ext_cond is not None:
-                    #     act_on_change([m, n])
                     
                     self.previous_task_status[m][n] = self.tasks_status[m][n]['state']
 
@@ -241,6 +231,7 @@ class RunWeeklySchedule:
                 msg = 'Task details [#%d/%d] %s %s' % (m, n, t[0], t[1])
                 # print(msg)
                 self.log_record(msg)
+                
 
     def get_task_report(self, task=None):
         now = datetime.datetime.now()
