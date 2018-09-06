@@ -2,8 +2,16 @@ from sys import path
 import datetime
 from time import sleep
 
-mod_path = '/home/guy/github/modules'
-main_path = '/home/guy/github/RemoteSwitch'
+# Linux
+# mod_path = '/home/guy/github/modules'
+# main_path = '/home/guy/github/RemoteSwitch'
+#
+
+# MAC
+mod_path = '/Users/guy/github/modules'
+main_path = '/Users/guy/github/RemoteSwitch'
+#
+
 path.append(mod_path)
 path.append(main_path)
 
@@ -13,8 +21,7 @@ from jReader import SchedReader
 
 
 class MQTTRemoteSchedule:
-    def __init__(self, master_topic, pub_topics, msg_topic, broker='192.168.2.113', qos=0, sched_filename=None,
-                 active=True):
+    def __init__(self, master_topic, pub_topics, msg_topic, broker='192.168.2.113', qos=0, sched_filename=None):
         self.param_file, self.confile_loc = None, None
 
         self.def_sched_down_1, self.def_sched_down_2 = {}, {}
@@ -31,10 +38,12 @@ class MQTTRemoteSchedule:
         self.sched_reader = SchedReader(filename=sched_filename)
         if self.sched_reader.data_from_file["topic"] != self.master_topic:
             self.sched_reader.update_value('topic', self.master_topic)
+        self.active_schedule_flag = self.sched_reader.data_from_file["enable"]
         #
 
         self.start_mqtt_service(device_name, qos)
         self.run_schedule()
+        self.schedule_report()
 
     # MQTT section
     def start_mqtt_service(self, device_name, qos):
@@ -46,9 +55,6 @@ class MQTTRemoteSchedule:
         self.pub_msg(msg_topic=self.msg_topic, msg='Schedule is active')
 
     def mqtt_commands(self, msg):
-        # msg_codes = ['0', '1', '2', '3', '4', '5', '6']
-        # msg_text = ['UP', 'DOWN', 'OFF', 'STATUS', 'DIS_SHCD', 'ENB_SCHD', 'REPORT']
-
         msg_codes = ['0', '1', '2', '3']
         msg_text = ['STATUS', 'DISABLE', 'ENABLE', 'REPORT']
 
@@ -86,13 +92,13 @@ class MQTTRemoteSchedule:
 
     def data_validation(self):
         if self.sched_reader.data_from_file["topic"] == self.master_topic:
-            print("Topic in schedule file- OK")
+            pass
+            # print("Topic in schedule file- OK")
         else:
             print("wrong topic in schedule file")
 
-
     def run_schedule(self):
-        # self.data_validation()
+        self.data_validation()
 
         self.schedule_up = scheduler.RunWeeklySchedule(on_func=lambda: self.pub_validated_commad('up'),
                                                        off_func=lambda: self.pub_validated_commad('off'))
@@ -103,21 +109,30 @@ class MQTTRemoteSchedule:
             for current_up_schedule in self.sched_reader.data_from_file["schedule_up"]:
                 self.schedule_up.add_weekly_task(new_task=current_up_schedule)
             self.schedule_up.start()
-            print("Up schedule loaded.")
 
             for current_down_schedule in self.sched_reader.data_from_file["schedule_down"]:
                 self.schedule_down.add_weekly_task(new_task=current_down_schedule)
-
             self.schedule_down.start()
-            print("Down schedule loaded.")
 
         else:
             print("Schedule is not enabled. \n Quit.")
 
-        sleep(2)
-
-        # self.pub_msg(self.schedule_up.logbook)
-
+    def schedule_report(self):
+        print('Topic: [%s]' % (self.master_topic))
+        for i in range(len(self.sched_reader.data_from_file["schedule_up"])):
+            schedule_program = "\t\t[UP   #%d]: Start: %s, %s, End: %s, %s" % \
+                               (i, self.sched_reader.data_from_file["schedule_up"][i]["start_days"],
+                                self.sched_reader.data_from_file["schedule_up"][i]["start_time"],
+                                self.sched_reader.data_from_file["schedule_up"][i]["end_days"],
+                                self.sched_reader.data_from_file["schedule_up"][i]["end_time"])
+            print(schedule_program)
+            schedule_program = "\t\t[Down #%d]: Start: %s, %s, End: %s, %s" % \
+                               (i, self.sched_reader.data_from_file["schedule_down"][i]["start_days"],
+                                self.sched_reader.data_from_file["schedule_down"][i]["start_time"],
+                                self.sched_reader.data_from_file["schedule_down"][i]["end_days"],
+                                self.sched_reader.data_from_file["schedule_down"][i]["end_time"])
+            print(schedule_program)
+        print('\n')
 
     def default_schedules(self):
         self.def_sched_up_1 = {'start_days': [1, 2, 3, 4, 5], 'start_time': '06:45:00',
@@ -130,7 +145,6 @@ class MQTTRemoteSchedule:
         self.def_sched_down_2 = {'start_days': [1, 2, 3, 4, 5], 'start_time': '08:00:00',
                                  'end_days': [1, 2, 3, 4, 5], 'end_time': '08:00:59'}
 
-
     def PBit(self):
         self.pub_msg('up')
         sleep(1)
@@ -139,8 +153,9 @@ class MQTTRemoteSchedule:
 
 
 topic_prefix = 'HomePi/Dvir/Windows/'
-Home_Devices = ['kRoomWindow']
+Home_Devices = ['kRoomWindow', 'pRoomWindow', 'fRoomWindow']
 Home_Devices = [topic_prefix + device for device in Home_Devices]
 
 for client in Home_Devices:
-    MQTTRemoteSchedule(master_topic=client, pub_topics=topic_prefix + '/SCHDS', msg_topic='HomePi/Dvir/Messages')
+    MQTTRemoteSchedule(broker='iot.eclipse.org', master_topic=client, pub_topics=topic_prefix + 'Remote_Schedules',
+                       msg_topic='HomePi/Dvir/Messages')
