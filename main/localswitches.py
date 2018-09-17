@@ -178,11 +178,9 @@ class XTractLastLogEvent:
             with open(self.fname, 'r') as f:
                 data_file = f.readlines()
                 for line in reversed(data_file):
+                    self.chopped_log = line + self.chopped_log
                     if 'log start' in line:
-                        self.chopped_log = line + self.chopped_log
                         break
-                    else:
-                        self.chopped_log = line + self.chopped_log
             return 1
         else:
             print('file', self.fname, ' not found')
