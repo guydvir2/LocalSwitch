@@ -183,8 +183,10 @@ class XTractLastLogEvent:
                         break
                     else:
                         self.chopped_log = line + self.chopped_log
+            return 1
         else:
             print('file', self.fname, ' not found')
+            return 0
 
     def xport_chopped_log(self):
         if self.chopped_log != []:
