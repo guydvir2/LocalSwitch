@@ -33,6 +33,8 @@ class MainGUI(tk.Frame):
         self._counter_loop_id = None
         self._timer2_loop_id = None
         self.timeRemain_counter = None
+        self.allowed_timer_press = 12
+        self.each_time_quota = 10  # mins
 
         self.off_state()
 
@@ -46,16 +48,16 @@ class MainGUI(tk.Frame):
 
     def timer_cb(self):
         if self.op_state.get() is True:
-            self.label1.set("On with Timer (%d minutes"%((self.op_timer.get()+1)*10))
+            self.label1.set("On with Timer (%d minutes" % ((self.op_timer.get() + 1) * self.each_time_quota))
             if self.op_timer.get() == 0:
                 self.timer_start = datetime.datetime.now()
                 self.op_timer.set(self.op_timer.get() + 1)
                 self.stop_clock()
                 self.stop_on_counter()
                 self.start_timer()
-            elif 12 >= self.op_timer.get() > 0:
+            elif self.allowed_timer_press >= self.op_timer.get() > 0:
                 self.op_timer.set(self.op_timer.get() + 1)
-            elif self.op_timer.get() > 13:
+            elif self.op_timer.get() == self.allowed_timer_press + 1:
                 self.op_timer.set(0)
                 self.stop_timer()
                 self.on_state()
@@ -70,10 +72,12 @@ class MainGUI(tk.Frame):
             try:
                 if (datetime.datetime.now() - self.on_start_time).total_seconds() > 3:
                     self.label1.set("Total ON time:")
-                    self.label2.set(str(datetime.datetime.now() - self.on_start_time)[:-5])
+                    t = str(datetime.datetime.now() - self.on_start_time)[:-5]
+                    print("Total ON time: %s" % t)
+                    self.label2.set(t)
                     self.on_start_time = None
-                    sleep(5)
             except AttributeError:
+                print("ERROR")
                 pass
         self.label1.set("Off")
         self.run_clock()
@@ -111,7 +115,7 @@ class MainGUI(tk.Frame):
     def start_timer(self):
         def run():
             self.timeRemain_counter = self.timer_start + datetime.timedelta(
-                seconds=5 * self.op_timer.get()) - datetime.datetime.now()
+                seconds=self.each_time_quota * self.op_timer.get()) - datetime.datetime.now()
 
             if self.timeRemain_counter.total_seconds() > 0:
                 self.label2.set(str(self.timeRemain_counter)[:-5])
