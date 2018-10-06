@@ -1,50 +1,50 @@
-# import tkinter as tk
 import datetime
+from gpiozero import Button, OutputDevice
 from time import sleep
 from threading import Thread
-
 from sys import path
 modules_path = '/home/guy/github/modules'
 path.append(modules_path)
+from use_lcd import MyLCD
 
-
-class MainGUI(Thread, MyLCD): #tk.Frame):
-    def __init__(self, master):
+class Boiler(Thread, MyLCD): 
+    def __init__(self):
         Thread.__init__(self)
         MyLCD.__init__(self)
-        # tk.Frame.__init__(self)
-        # self.master = master
-        # self.master.title("HotWater Boiler Controller")
-        # self.label1 = tk.StringVar()
-        # self.label2 = tk.StringVar()
-
-        self.op_state = tk.BooleanVar()
-        self.op_state.set(False)
-        self.op_timer = tk.IntVar()
-        self.op_timer.set(0)
-
-        # self.frame = tk.Frame(self.master)
-        # self.frame.grid()
-        # self.start_stop_button = tk.Button(self.frame, text="Start", command=self.on_off_cb, width=15)
-        # self.start_stop_button.grid(row=2, column=0)
-        # self.timer_button = tk.Button(self.frame, text="Timer", command=self.timer_cb)
-        # self.timer_button.grid(row=2, column=1)
-        # self.time_label = tk.Label(self.frame, textvariable=self.label1)
-        # self.time_label.grid(row=0, column=0, columnspan=2)
-        # self.cmd_label = tk.Label(self.frame, textvariable=self.label2)
-        # self.cmd_label.grid(row=1, column=0, columnspan=2)
-
+        self.boot_test()
         self.on_start_time = None
         self.timer_start = None
-        self._clock_loop_id = None
-        self._counter_loop_id = None
-        self._timer2_loop_id = None
         self.timeRemain_counter = None
         self.allowed_timer_press = 12
         self.each_time_quota = 10  # mins
+        self.on_button_pressed = False
+        self.timer_button_pressed = False
+        self.line1, self.line2 = "",""
+        
+        self.init_gpio()
+        self.on_state()
 
-        self.off_state()
+    def init_gpio(self):
+        self.on_button = Button(16)
+        self.on_button.when_pressed = self.on_off_cb
+        
+        self.timer_button = Button(26)
+        self.timer_button.when_pressed = self.timer_cb
 
+        self.relay_1 = OutputDevice(20,initial_value=False, active_high=False)
+
+    def run(self):
+        while True:
+            now_time = datetime.datetime.now()
+            if self.on_button_pressed is True:
+                self.line1 = "On"
+                self.line2 = str(datetime.datetime.now()-self.on_start_time)[:-5]
+            elif self.on_button_pressed is False:
+                self.line1 = "Off"
+                self.line2=str(now_time)[:-5]
+
+            self.center_str(text1=self.line1, text2=self.line2)
+            sleep(0.1)
     # Buttons callbacks
     def on_off_cb(self):
         if self.op_state.get() is False:
@@ -72,10 +72,8 @@ class MainGUI(Thread, MyLCD): #tk.Frame):
 
     # states
     def off_state(self):
-        self.op_state.set(False)
-        if self._counter_loop_id is not None:
-            self.stop_on_counter()
-
+        self.on_button_pressed = False
+        self.relay_1.off()
         # if self.on_start_time is not None:
         #     print("enter on start")
         #     try:
@@ -87,20 +85,17 @@ class MainGUI(Thread, MyLCD): #tk.Frame):
         #             self.label2.set("GUY")
         #     except AttributeError:
         #         print("ERROR")
-        # sleep(2)
+        # 
 
         # self.label1.set("Off")
-        print("Off")
         self.on_start_time = None
-        self.run_clock()
 
     def on_state(self):
         if self.on_start_time is None:
             self.on_start_time = datetime.datetime.now()
-        # self.label1.set("On")
+            self.on_button_pressed= True
+            self.relay_1.on()
         print("On")
-        self.stop_clock()
-        self.start_on_counter()
 
     def turn_off_device(self):
         self.off_state()
@@ -149,13 +144,6 @@ class MainGUI(Thread, MyLCD): #tk.Frame):
             self.turn_off_device()
             self.op_timer.set(0)
 
-    def stop_timer(self):
-        pass
-        # root.after_cancel(self._timer2_loop_id)
-        # self._timer2_loop_id = None
-
-
-# root = tk.Tk()
-# mGui = MainGUI(root)
-#
-# root.mainloop()
+a = Boiler()
+print("Start")
+a.start()
