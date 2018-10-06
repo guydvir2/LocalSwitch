@@ -11,11 +11,9 @@ class Boiler(Thread, MyLCD):
     def __init__(self):
         Thread.__init__(self)
         MyLCD.__init__(self)
-        self.boot_test()
 
         self.on_start_time = None
         self.timer_start = None
-        self.timeRemain_counter = None
         self.max_timer_count = 12
         self.each_time_quota = 10  # mins
         self.on_button_pressed = False
@@ -66,7 +64,7 @@ class Boiler(Thread, MyLCD):
                 self.line2= str(rem_time)[:-5]
                 if rem_time.total_seconds()<= 0:
                     self.off_state()
-
+                    need_clear = True
             self.center_str(text1=self.line1, text2=self.line2)
             sleep(0.1+t)
             if need_clear is True:
@@ -88,34 +86,22 @@ class Boiler(Thread, MyLCD):
                 self.timer_counter +=1
             elif self.timer_counter > self.max_timer_count:
                 self.timer_counter = 0
-
-           
+                self.timer_button_pressed = False
+          
     # states
     def off_state(self):
         self.on_button_pressed = False
         self.relay_1.off()
-        # if self.on_start_time is not None:
-        #     print("enter on start")
-        #     try:
-        #         if (datetime.datetime.now() - self.on_start_time).total_seconds() > 3:
-        #             print("resetting")
-        #             self.label1.set("Total ON time:")
-        #             t = str(datetime.datetime.now() - self.on_start_time)[:-5]
-        #             print("Total ON time: %s" % t)
-        #             self.label2.set("GUY")
-        #     except AttributeError:
-        #         print("ERROR")
-        # 
-
-        # self.label1.set("Off")
+        self.timer_button_pressed = False
+        self.timer_counter = 0
+        self.timer_start = None
         #self.on_start_time = None
+
 
     def on_state(self):
         if self.on_start_time is None:
-            # self.on_start_time = datetime.datetime.now()
             self.on_button_pressed= True
             self.relay_1.on()
-        print("On")
 
     def turn_off_device(self):
         self.off_state()
