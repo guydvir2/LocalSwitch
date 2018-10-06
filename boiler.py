@@ -13,11 +13,17 @@ from mqtt_switch import MQTTClient
 
 
 class Boiler(Thread, MyLCD):
-    def __init__(self):
+    def __init__(self, sid='hotwater_boiler', device_topic="HomePi/Dvir/WaterBoiler", msg_topic="HomePi/Dvir/Messages",
+                 topic_qos=0, host="192.168.2.200", username="guy", password="kupelu9e"):
         Thread.__init__(self)
         MyLCD.__init__(self)
-        self.mqtt_client = MQTTClient(sid='hotwater_boiler', topics=["HomePi/Dvir/WaterBoiler", "HomePi/Dvir/All"], topic_qos=0,
-                                      host="192.168.2.200", username="guy", password="kupelu9e")
+        self.msg_topic = msg_topic
+        self.device_topic = device_topic
+        self.state_topic = device_topic + "/State"
+        self.avail_topic = device_topic + "/Avail"
+
+        self.mqtt_client = MQTTClient(sid=sid, topics=[self.device_topic], topic_qos=topic_qos, host=host,
+                                      username=username, password=password)
 
         self.on_start_time = None
         self.timer_start = None
@@ -52,8 +58,22 @@ class Boiler(Thread, MyLCD):
     def mqtt_commands(self, msg):
         if msg.lower() == "on":
             self.on_state()
-        elif msg.lower == "off":
+            msg1 = '[Remote]: On'
+        elif msg.lower() == "off":
             self.off_state()
+            msg1 = '[Remote]: Off'
+
+        self.pub_msg(msg=msg1)
+
+    def pub_msg(self, msg, topic=None):
+        if topic is None:
+            msg_topic = self.msg_topic
+        else:
+            msg_topic = topic
+
+        device_name = 'WaterBoiler'
+        time_stamp = '[' + str(datetime.datetime.now())[:-4] + ']'
+        self.mqtt_client.pub(payload='%s [%s] %s' % (time_stamp, device_name, msg), topic=msg_topic)
 
     def run(self):
         while True:
@@ -126,53 +146,6 @@ class Boiler(Thread, MyLCD):
         if self.on_start_time is None:
             self.on_button_pressed = True
             self.relay_1.on()
-
-    # def turn_off_device(self):
-    #     self.off_state()
-    #
-    # # clock displayed when state is OFF
-    # def run_clock(self):
-    #     time = str(datetime.datetime.now())[:-7]
-    #     # self.label2.set(time)
-    #     print(time)
-    #     # self._clock_loop_id = root.after(500, self.run_clock)
-    #
-    # def stop_clock(self):
-    #     pass
-    #     # root.after_cancel(self._clock_loop_id)
-    #
-    # # count ON time
-    # def start_on_counter(self):
-    #     time_delta = datetime.datetime.now() - self.on_start_time
-    #     # self.label2.set(str(time_delta)[:-5])
-    #     print(str(time_delta)[:-5])
-    #     # self._counter_loop_id = root.after(500, self.start_on_counter)
-    #
-    # def stop_on_counter(self):
-    #     root.after_cancel(self._counter_loop_id)
-    #     self._counter_loop_id = None
-    #
-    # # Display timer time
-    # def start_timer(self):
-    #     def run():
-    #         self.timeRemain_counter = self.timer_start + datetime.timedelta(
-    #             seconds=self.each_time_quota * self.op_timer.get()) - datetime.datetime.now()
-    #
-    #         if self.timeRemain_counter.total_seconds() > 0:
-    #             # self.label2.set(str(self.timeRemain_counter)[:-5])
-    #             print(str(self.timeRemain_counter)[:-5])
-    #         else:
-    #             self.op_timer.set(0)
-    #
-    #     if self.op_timer.get() > 0:
-    #         run()
-    #         # self._timer2_loop_id = root.after(500, self.start_timer)
-    #
-    #     else:
-    #         self.timeRemain_counter = None
-    #         self.stop_timer()
-    #         self.turn_off_device()
-    #         self.op_timer.set(0)
 
 
 a = Boiler()
