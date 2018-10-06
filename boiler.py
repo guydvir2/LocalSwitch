@@ -12,17 +12,19 @@ class Boiler(Thread, MyLCD):
         Thread.__init__(self)
         MyLCD.__init__(self)
         self.boot_test()
+
         self.on_start_time = None
         self.timer_start = None
         self.timeRemain_counter = None
-        self.allowed_timer_press = 12
+        self.max_timer_count = 12
         self.each_time_quota = 10  # mins
         self.on_button_pressed = False
         self.timer_button_pressed = False
         self.line1, self.line2 = "",""
+        self.timer_counter = 0
         
         self.init_gpio()
-        self.on_state()
+        self.off_state()
 
     def init_gpio(self):
         self.on_button = Button(16)
@@ -35,41 +37,50 @@ class Boiler(Thread, MyLCD):
 
     def run(self):
         while True:
+            t=0
             now_time = datetime.datetime.now()
+
             if self.on_button_pressed is True:
-                self.line1 = "On"
-                self.line2 = str(datetime.datetime.now()-self.on_start_time)[:-5]
+                if self.on_start_time is None:
+                    self.line1 = "On"
+                    self.on_start_time = datetime.datetime.now()
+                else:
+                    self.line2 = str(datetime.datetime.now()-self.on_start_time)[:-5]
             elif self.on_button_pressed is False:
-                self.line1 = "Off"
-                self.line2=str(now_time)[:-5]
+                if self.on_start_time is not None:
+                    self.line1 = "Total ON time"
+                    self.line2 = str(datetime.datetime.now()-self.on_start_time)[:-5]
+                    t=3
+                    self.on_start_time = None
+                else:
+                    self.line1 = "Off"
+                    self.line2=str(now_time)[:-5]
+
+            elif self.timer_button_pressed is True:
+                self.line1= "ON, %d minutes"%(self.timer_counter*self.each_time_quota)
+                self.line2= str(self.timer_start+datetime.timedelta(seconds=self.timer_counter*self.each_time_quota)-datetime.datetime.now())[:-5]
 
             self.center_str(text1=self.line1, text2=self.line2)
-            sleep(0.1)
+            sleep(0.1+t)
+
     # Buttons callbacks
     def on_off_cb(self):
-        if self.op_state.get() is False:
+        if self.on_button_pressed is False:
             self.on_state()
-            self.op_state.set(True)
-        elif self.op_state.get() is True:
+        elif self.on_button_pressed  is True:
             self.off_state()
 
     def timer_cb(self):
-        if self.op_state.get() is True:
-            # self.label1.set("On with Timer (%d minutes" % ((self.op_timer.get() + 1) * self.each_time_quota))
-            print("On with Timer (%d minutes" % ((self.op_timer.get() + 1) * self.each_time_quota))
-            if self.op_timer.get() == 0:
+        if self.on_button_pressed is True:
+            if self.timer_start is None:
                 self.timer_start = datetime.datetime.now()
-                self.op_timer.set(self.op_timer.get() + 1)
-                self.stop_clock()
-                self.stop_on_counter()
-                self.start_timer()
-            elif self.allowed_timer_press >= self.op_timer.get() > 0:
-                self.op_timer.set(self.op_timer.get() + 1)
-            elif self.op_timer.get() == self.allowed_timer_press + 1:
-                self.op_timer.set(0)
-                self.stop_timer()
-                self.on_state()
+                self.timer_button_pressed = True
+            if self.timer_counter <=self.max_timer_count:
+                self.timer_counter +=1
+            elif self.timer_counter > self.max_timer_count:
+                self.timer_counter = 0
 
+           
     # states
     def off_state(self):
         self.on_button_pressed = False
@@ -88,11 +99,11 @@ class Boiler(Thread, MyLCD):
         # 
 
         # self.label1.set("Off")
-        self.on_start_time = None
+        #self.on_start_time = None
 
     def on_state(self):
         if self.on_start_time is None:
-            self.on_start_time = datetime.datetime.now()
+            # self.on_start_time = datetime.datetime.now()
             self.on_button_pressed= True
             self.relay_1.on()
         print("On")
