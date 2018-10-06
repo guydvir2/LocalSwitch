@@ -40,28 +40,37 @@ class Boiler(Thread, MyLCD):
             t=0
             now_time = datetime.datetime.now()
 
-            if self.on_button_pressed is True:
+            if self.on_button_pressed is True and self.timer_button_pressed is False:
                 if self.on_start_time is None:
                     self.line1 = "On"
                     self.on_start_time = datetime.datetime.now()
+                    need_clear = True
                 else:
                     self.line2 = str(datetime.datetime.now()-self.on_start_time)[:-5]
+                    need_clear=False
             elif self.on_button_pressed is False:
                 if self.on_start_time is not None:
                     self.line1 = "Total ON time"
                     self.line2 = str(datetime.datetime.now()-self.on_start_time)[:-5]
                     t=3
                     self.on_start_time = None
+                    need_clear = True
                 else:
                     self.line1 = "Off"
                     self.line2=str(now_time)[:-5]
+                    need_clear = False
 
             elif self.timer_button_pressed is True:
                 self.line1= "ON, %d minutes"%(self.timer_counter*self.each_time_quota)
-                self.line2= str(self.timer_start+datetime.timedelta(seconds=self.timer_counter*self.each_time_quota)-datetime.datetime.now())[:-5]
+                rem_time = self.timer_start+datetime.timedelta(seconds=self.timer_counter*self.each_time_quota)-datetime.datetime.now()
+                self.line2= str(rem_time)[:-5]
+                if rem_time.total_seconds()<= 0:
+                    self.off_state()
 
             self.center_str(text1=self.line1, text2=self.line2)
             sleep(0.1+t)
+            if need_clear is True:
+                self.clear_lcd()
 
     # Buttons callbacks
     def on_off_cb(self):
