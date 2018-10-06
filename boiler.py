@@ -4,8 +4,11 @@ from time import sleep
 from threading import Thread
 from sys import path
 modules_path = '/home/guy/github/modules'
+mqtt_path = '/home/guy/github/MQTTswitches'
 path.append(modules_path)
+path.append(mqtt_path)
 from use_lcd import MyLCD
+from mqtt_switch import MQTTClient
 
 class Boiler(Thread, MyLCD): 
     def __init__(self):
@@ -20,6 +23,7 @@ class Boiler(Thread, MyLCD):
         self.timer_button_pressed = False
         self.line1, self.line2 = "",""
         self.timer_counter = 0
+        self.dbounceTime=0.1
         
         self.init_gpio()
         self.off_state()
@@ -27,11 +31,13 @@ class Boiler(Thread, MyLCD):
     def init_gpio(self):
         self.on_button = Button(16)
         self.on_button.when_pressed = self.on_off_cb
+        self.on_button.when_released = lambda: sleep(self.dbounceTime)
         
         self.timer_button = Button(26)
         self.timer_button.when_pressed = self.timer_cb
+        self.timer_button.when_released = lambda: sleep(self.dbounceTime)
 
-        self.relay_1 = OutputDevice(20,initial_value=False, active_high=False)
+        self.relay_1 = OutputDevice(20,initial_value=False, active_high=True)
 
     def run(self):
         while True:
@@ -72,12 +78,14 @@ class Boiler(Thread, MyLCD):
 
     # Buttons callbacks
     def on_off_cb(self):
+        # sleep(self.dbounceTime)
         if self.on_button_pressed is False:
             self.on_state()
         elif self.on_button_pressed  is True:
             self.off_state()
 
     def timer_cb(self):
+        # sleep(self.dbounceTime)
         if self.on_button_pressed is True:
             if self.timer_start is None:
                 self.timer_start = datetime.datetime.now()
